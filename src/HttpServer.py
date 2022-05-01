@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import time
+import sys
 import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from Daemonize import Daemon
 
 class HttpServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -41,20 +45,20 @@ class HttpServerHandler(BaseHTTPRequestHandler):
         }
         return dictRes
 
-class HttpServer:
-    def __init__(self):
+class HttpServer(Daemon):
+    def __init__(self, name = 'HttpServer'):
+        Daemon.__init__(self, name)
         return
 
-    def run(self, port):
+    def run(self):
         httpd = HTTPServer(('0.0.0.0', 8888), HttpServerHandler)
         httpd.serve_forever()
         return
 
-
-def main():
-    hs = HttpServer()
-    hs.run(port=8888)
+def main(argv):
+    daemon = HttpServer()
+    daemon.main(argv)
     return
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
