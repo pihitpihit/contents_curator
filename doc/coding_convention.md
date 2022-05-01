@@ -1,12 +1,15 @@
 # python
-- variable : camelCasing
-    - dictionary : dictCamelCasing
-    - list       : listCamelCasing
-    - tuple      : tupCamelCasing
 - function : PascalCasing
 - indent : 4 space
 - file name : PascalCasing.py
 - folder name : snake_casing
+- variable : camelCasing
+    - dictionary : dictCamelCasing
+    - list       : listCamelCasing
+    - tuple      : tupCamelCasing
+- literal string
+    - prefered     : 'literal string'
+    - not prefered : "literal string'
 - space
     - binary operator
         - prefered     : a == b
