@@ -15,7 +15,7 @@ class Daemon(metaclass=ABCMeta):
         self.pidLockFile = pidfile.PIDLockFile(self.pidPath)
         return
 
-    def waitForUnlock(self):
+    def WaitForUnlock(self):
         time.sleep(0.1)
         count = 0
         while True:
@@ -30,10 +30,10 @@ class Daemon(metaclass=ABCMeta):
         return
 
     @abstractmethod
-    def run(self):
+    def Run(self):
         pass
 
-    def start(self):
+    def Start(self):
         if self.pidLockFile.is_locked():
             print(
                 '%s deamon is already running (pid:%d)' % (
@@ -45,10 +45,10 @@ class Daemon(metaclass=ABCMeta):
 
         print('%s daemon - start' % self.name)
         with daemon.DaemonContext(pidfile = self.pidLockFile):
-            self.run()
+            self.Run()
         return
 
-    def stop(self):
+    def Stop(self):
         if self.pidLockFile.is_locked():
             os.system('kill %d' % self.pidLockFile.read_pid())
             print('%s daemon - stopped' % self.name)
@@ -56,34 +56,36 @@ class Daemon(metaclass=ABCMeta):
             print('%s daemon - not running' % self.name)
         return
 
-    def restart(self):
+    def Restart(self):
         self.stop()
-        self.waitForUnlock()
+        self.WaitForUnlock()
         self.start()
         return
 
-    def main(self, argv):
-        if len(argv) < 2:
-            self.usage()
-            return
+    def Main(self, argv):
+        op = None
+        if 2 <= len(argv):
+            op = argv[1]
 
-        op = argv[1]
         if op == 'start':
-            self.start()
+            self.Start()
         elif op == 'stop':
-            self.stop()
+            self.Stop()
         elif op == 'restart':
-            self.restart()
+            self.Restart()
+        elif op == 'block':
+            self.Run()
         else:
             print('[Error] Unknown operation.')
-            self.usage()
+            self.Usage()
         return
 
-    def usage(self):
+    def Usage(self):
         print('Usage:')
         print('\tstart')
         print('\tstop')
         print('\trestart')
+        print('\tblock')
         print()
 
 if __name__ == '__main__':
@@ -92,7 +94,7 @@ if __name__ == '__main__':
             Daemon.__init__(self, 'TestDaemon2')
             return
 
-        def run(self):
+        def Run(self):
             while True:
                 os.system('echo BB >> /home/pihit/workspace/contents_curator/src/test.txt')
 
@@ -100,4 +102,4 @@ if __name__ == '__main__':
         d = TestDaemon2()
     else:
         d = Daemon('TestDaemon')
-    d.main(sys.argv)
+    d.Main(sys.argv)
