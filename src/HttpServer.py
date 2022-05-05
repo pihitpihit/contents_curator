@@ -7,11 +7,14 @@ import os
 import json
 import importlib
 import threading
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from Daemonize import Daemon
 from ChangeMonitor import ChangeMonitor
+import Util
 
 class HttpServerHandler(BaseHTTPRequestHandler):
+    name = "DefaultHttpServer"
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
@@ -20,40 +23,67 @@ class HttpServerHandler(BaseHTTPRequestHandler):
         return
 
     def do_POST(self):
+        self.requestJson = None
         contentLength = self.ContentLength()
-        data = self.Data()
+        data = self.GetRequestJson()
 
         print('[do_POST] path          = %s' % self.path)
         print('[do_POST] contentLength = %d' % contentLength)
         print('[do_POST] data          = %s' % data)
 
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.end_headers()
+        try:
+            dictRes = self.MakeResponse()
+            jsonRes = (json.dumps(dictRes) + '\n').encode('utf-8')
 
-        dataRes = (json.dumps(self.HelloWorldResponse()) + '\n').encode('utf-8')
-        self.wfile.write(dataRes)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+
+            self.wfile.write(jsonRes)
+            print('[do_POST][RESPONSE]', dictRes)
+
+        except:
+            self.send_response(500)
+            print('[do_POST][RESPONSE] Error 500')
+            raise
+
+        #finally:
+        #    print('[do_POST] dictRes       = %s' % Util.DictToPretty(dictRes))
+
         return
 
     def ContentLength(self):
         return int(self.headers.get('Content-Length'))
 
-    def Data(self):
-        return json.loads(self.rfile.read(self.ContentLength()))
+    def GetRequestJson(self):
+        if self.requestJson is None:
+            self.requestJson = json.loads(self.rfile.read(self.ContentLength()))
+        return self.requestJson
 
-    def HelloWorldResponse(self):
+    def MakeResponse(self):
         dictRes = {}
         dictRes['version'] = '1.0'
         dictRes['data'] = {
-            'msg': 'Hello Eightanium3'
+            'msg': self.Response()
         }
         return dictRes
 
+    def Response(self):
+        return self.HelloWorldMessage()
+
+    def HelloWorldMessage(self):
+        return 'Hello Eightanium'
+
 class HttpServer(Daemon):
-    def __init__(self, name = 'HttpServer'):
+    def __init__(self, handler = None):
         self.stopOnModified = False
         self.monitor = ChangeMonitor()
-        Daemon.__init__(self, name)
+        self.handler = handler
+
+        if self.handler is None:
+            self.handler = HttpServerHandler
+
+        Daemon.__init__(self, self.handler.name)
         return
 
     def StopOnModified(self, listFile):
@@ -72,7 +102,7 @@ class HttpServer(Daemon):
             monitorThread = threading.Thread(target=self.ChangeMonitor)
             monitorThread.start()
 
-        self.httpd = HTTPServer(('0.0.0.0', 8888), HttpServerHandler)
+        self.httpd = HTTPServer(('0.0.0.0', 8888), self.handler)
         self.httpd.serve_forever()
 
         if self.stopOnModified:
