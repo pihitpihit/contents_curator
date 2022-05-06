@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+:KakaoTalkUser: as usr
+:ServerManager: as mgr
+
+package KakaoBotServer {
+    usecase "Start" as KbsStart
+    usecase "Stop" as KbsStop
+    usecase "Restart" as KbsRestart
+    usecase "Request" as KbsRequest
+}
+
+package GoogleCtrl {
+    usecase "Get file info" as GcGfi
+}
+
+package Google {
+    usecase "Login" as glogin
+    usecase "Logout" as glogout
+}
+
+mgr --> KbsStart
+mgr --> KbsStop
+mgr --> KbsRestart
+usr --> KbsRequest
+KbsRequest .> KbsStart : include
+KbsRequest --> GcGfi
+GoogleCtrl --> glogin
+GoogleCtrl --> glogout
+
+@enduml
