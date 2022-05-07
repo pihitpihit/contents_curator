@@ -1,12 +1,9 @@
-from distutils.log import error
 import os
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from googleapiclient.errors import HttpError
-from apiclient import errors
 
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -16,7 +13,7 @@ creds = None
 
 #print(os.getcwd())
 
-def ConnectGoogleDrive():
+def ConnectService():
   
   if os.path.exists(tokenJson):
     global creds 
@@ -32,40 +29,9 @@ def ConnectGoogleDrive():
     with open(tokenJson, 'w') as token:
       token.write(creds.to_json())
 
-  try:
-    service = build('drive', 'v3', credentials=creds)
-    print('conncet')
-
-  except:
-    print('[FAIL]conncet')
-
+  service = build('drive', 'v3', creds)
+  print('conncet')
   return service
-
-def retrieve_all_files(service):
-
-  Found = []
-  pToken = None
-  
-  while True:
-    results = service.files().list(
-      pageSize=10, fields='nextPageToken, files(id, name)',
-      pageToken=pToken).execute()
-    items = results.get('files', [])
-
-    if not items:
-      print('No files found.')
-      break
-    
-    print('FILES: ')
-    for item in items :
-      print(u'{0}, ({1})' .format(item['name'], item['id']))
-
-    pToekn = results.get('nextPageToken')    
-    if not pToken:
-      break
-
-  return results
-
 
 
 def DisconnectService(service):
@@ -75,14 +41,10 @@ def DisconnectService(service):
 
 
 def main():
-  print('[main] Start')
-
-  service = ConnectGoogleDrive()
-  retrieve_all_files(service)
-  
+  service = ConnectService()
+  print('[main]')
   DisconnectService(service)
 
-  print('[main] End')
   return
 
 

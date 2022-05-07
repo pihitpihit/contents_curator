@@ -189,7 +189,7 @@ class gdrv:
 				fields='nextPageToken, files(name, id)'
 			).execute()
 
-			items = result.errors.HttpError('files', [])
+			items = result.get('files', [])
 			for item in items:
 				name = item['name']
 				id = item['id']
