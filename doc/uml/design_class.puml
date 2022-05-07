@@ -1,0 +1,19 @@
+@startuml
+class BotLauncher
+class BotServer
+class HttpServer
+class HttpServerHandler
+class KakaoBotHandler
+abstract Daemonize
+class ChangeMonitor
+
+BotLauncher --> BotServer
+BotServer --> KakaoBotHandler
+BotServer --> HttpServer
+KakaoBotHandler --|> HttpServerHandler
+HttpServerHandler --* HttpServer
+ChangeMonitor --* HttpServer
+HttpServer --|> Daemonize
+KakaoBotHandler --o HttpServer
+
+@enduml
