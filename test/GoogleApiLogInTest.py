@@ -1,12 +1,16 @@
-from distutils.log import error
+from ast import Is, Not
+import mimetypes
 import os
+import io
 
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from googleapiclient.errors import HttpError
 from apiclient import errors
+from requests import request
 
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -41,31 +45,85 @@ def ConnectGoogleDrive():
 
   return service
 
-def retrieve_all_files(service):
+def RetrieveAllFilesFolders(service):
 
-  Found = []
+  print('[Retrieve] Start')
+  contentsList = []
   pToken = None
   
   while True:
     results = service.files().list(
-      pageSize=10, fields='nextPageToken, files(id, name)',
+      pageSize=500, fields='nextPageToken, files(id, name)',
       pageToken=pToken).execute()
     items = results.get('files', [])
 
-    if not items:
-      print('No files found.')
-      break
+    contentsList.extend(items)
+    #for item in items:
+    #  contentsList.append(item)
     
-    print('FILES: ')
-    for item in items :
-      print(u'{0}, ({1})' .format(item['name'], item['id']))
-
-    pToekn = results.get('nextPageToken')    
+    pToken = results.get('nextPageToken')
     if not pToken:
       break
 
-  return results
+  print('[Retrieve] End')
 
+  return contentsList
+
+def PrintContentsList(contents):
+  
+  if contents is not None :
+    print('[FILES] %d' %(int(len(contents))))
+    for content in contents :
+      print(u'{0}, ({1})' .format(content['name'], content['id']))
+
+  return
+
+def IsExistFile(service, fileName):
+  """
+    fileName과 동일한 파일 네임이 존재하는지 검사.
+  """
+  
+  contentsList = list()
+  pToken = None
+  
+  while True:
+    results = service.files().list(
+      name=fileName,
+      pageSize=500, fields='nextPageToken, files(id, name)',
+      pageToken=pToken).execute()
+    items = results.get('files', [])
+
+    contentsList.extend(items)
+    #for item in items:
+    #  contentsList.append(item)
+    
+    pToken = results.get('nextPageToken')
+    if not pToken:
+      break
+  
+
+  return contentsList
+
+def DownloadByFileId(service, fId):
+  """
+    File ID를 이용하여 파일 다운로드
+  """
+
+  print( '[Downlaod] Start')
+  request = service.files().get_media(fileId=fId)
+  #fh = io.BytesIO()
+  fh = io.FileIO('test.png', mode='wb')
+  downLoader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
+  done = False
+
+  while done is False:
+    status, done = downLoader.next_chunk()
+    #print (status.progress())
+    print( "Download %d%%" %int(status.progress()* 100) ) 
+    
+  print( '[Downlaod] End')
+
+  return
 
 
 def DisconnectService(service):
@@ -76,10 +134,34 @@ def DisconnectService(service):
 
 def main():
   print('[main] Start')
-
-  service = ConnectGoogleDrive()
-  retrieve_all_files(service)
+  contentsList = None
   
+  service = ConnectGoogleDrive()
+  #contentsList = RetrieveAllFilesFolders(service)
+  
+  #PrintContentsList(contentsList)
+  #StudyJordyFileID = '1wyNFNt1CaWfOQMBD0XkqS_8kfcltvqlR'
+  #DownloadByFileId(service, StudyJordyFileID)
+  #contentsList = RetrieveAllFilesFolders(service)
+  targetList = IsExistFile(service, 'StudyJordy.png')
+  if not targetList:
+    for target in targetList:
+      print( target['name'] )
+
+  #PrintContentsList(contentsList)
+
+  # if bExist is True:
+  #   print( 'Jordy is In!!!!!!!')
+  # else:
+  #   print( 'Jordy is Not')
+
+  # PrintContentsList(contentsList)
+
+  # if contentsList is None:
+  #   print( 'Contents List Is None' )  
+  # else:
+  #   print( 'Contents List is Exist' )  
+
   DisconnectService(service)
 
   print('[main] End')
