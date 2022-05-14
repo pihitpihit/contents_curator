@@ -12,11 +12,14 @@ if __name__ == '__main__':
     try:
         daemon = HttpServer(KakaoBotHandler)
         daemon.StopOnModified([
-            os.path.join('.', 'HttpServer.py'),
             os.path.join('.', 'ChangeMonitor.py'),
+            os.path.join('.', 'Daemonize.py'),
+            os.path.join('.', 'Util.py'),
+            os.path.join('.', 'HttpServer.py'),
             os.path.join('.', 'BotServer.py'),
             os.path.join('.', 'KakaoBotHandler.py'),
-            os.path.join('.', 'Util.py'),
+            os.path.join('.', 'KakaoBotButton.py'),
+            os.path.join('.', 'KakaoBotOutput.py'),
         ])
         daemon.Main(sys.argv)
     except SyntaxError as e:
