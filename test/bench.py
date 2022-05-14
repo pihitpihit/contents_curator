@@ -2,7 +2,6 @@
 import os
 import time
 import random
-from datetime import datetime
 
 class BenchClock:
     def __init__(self):
