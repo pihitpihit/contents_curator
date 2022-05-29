@@ -49,41 +49,11 @@ class KakaoBotHandler(HttpServer.HttpServerHandler):
 
     def MakeResponse(self):
         dictJson = self.GetRequestJson()
-
         print('[Response] intent : %s' % dictJson['intent'])
 
+        response = KakaoBotResponse()
         if dictJson['intent']['name'] == '폴백 블록':
-            response = KakaoBotResponse()
-
-
-            if False:
-                carousel = KakaoBotCarousel()
-
-                for i in reversed(range(2)):
-                    card = KakaoBotBasicCard(
-                        thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg'
-                    )
-                    card.AddButton(KakaoBotMsgButton('%d' % (i + 1), '하이'))
-                    card.AddButton(KakaoBotBlockButton('Block', 'TestBlock', 'Test'))
-                    carousel.AddOutput(card)
-
-                carousel.SetHeader(thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg')
-                response.AddOutput(carousel)
-                response.AddOutput(carousel)
-                response.AddOutput(carousel)
-                response.AddOutput(carousel)
-            else:
-                card = KakaoBotBasicCard(
-                    thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg'
-                )
-                card.AddButton(KakaoBotLinkButton('나무위키', 'https://namu.wiki'))
-                card.AddButton(KakaoBotBlockButton('Block', 'TestBlock', '600c5269e0c5156fec2f9406'))
-
-                response.AddOutput(card)
-
-                for i in reversed(range(30)):
-                    response.AddQuickReply(KakaoBotBlockButton(i, 'TestBlock', '600c5269e0c5156fec2f9406'))
-
+            self.OnFallback(response)
             return response.GetData()
 
         return self.MakeSimpleResponse()
@@ -95,4 +65,38 @@ class KakaoBotHandler(HttpServer.HttpServerHandler):
             'msg': self.GetRequestJson()
         }
         return dictRes
+
+    def OnFallBack(self):
+        raise NotImplementedError('Fallback block method is not implmented.')
+
+    def OnFallBackTest(self):
+
+        if False:
+            carousel = KakaoBotCarousel()
+
+            for i in reversed(range(2)):
+                card = KakaoBotBasicCard(
+                    thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg'
+                )
+                card.AddButton(KakaoBotMsgButton('%d' % (i + 1), '하이'))
+                card.AddButton(KakaoBotBlockButton('Block', 'TestBlock', 'Test'))
+                carousel.AddOutput(card)
+
+            carousel.SetHeader(thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg')
+            response.AddOutput(carousel)
+            response.AddOutput(carousel)
+            response.AddOutput(carousel)
+            response.AddOutput(carousel)
+        else:
+            card = KakaoBotBasicCard(
+                thumbnail = 'http://t1.daumcdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a50476.jpg'
+            )
+            card.AddButton(KakaoBotLinkButton('나무위키', 'https://namu.wiki'))
+            card.AddButton(KakaoBotBlockButton('Block', 'TestBlock', '600c5269e0c5156fec2f9406'))
+
+            response.AddOutput(card)
+
+            for i in reversed(range(30)):
+                response.AddQuickReply(KakaoBotBlockButton(i, 'TestBlock', '600c5269e0c5156fec2f9406'))
+        return
 
