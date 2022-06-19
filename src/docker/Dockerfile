@@ -25,6 +25,7 @@ RUN pip3 install watchdog
 #
 ENV CC_PROMPT="\[\e[1;92m\]\u\[\e[m\]@\[\e[33m\]\h\[\e[m\]:\[\033[1;94m\]\w\[\e[m\]$ "
 RUN echo 'PS1=$CC_PROMPT' >> ~/.bashrc
+RUN mkdir -p /root/contents-curator
 
 #
 # copy src
@@ -34,5 +35,8 @@ COPY copy/* /root/.
 #
 # startup
 #
-ENTRYPOINT cd ~ && ./TestBot.sh native
+ENTRYPOINT cd ~ && \
+           [ -f "./contents-curator/TestBot.sh" ] && \
+               cd contents-curator/ && ./TestBot.sh native || \
+               ./TestBot.sh native
 
