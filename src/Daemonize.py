@@ -5,7 +5,10 @@ import os
 import daemon
 import time
 from abc import *
-from daemon import pidfile
+try:
+    from daemon import pidfile
+except:
+    import pidfile
 from daemon import DaemonContext
 
 class Daemon(metaclass=ABCMeta):
