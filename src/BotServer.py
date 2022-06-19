@@ -5,7 +5,6 @@ import sys
 import os
 import time
 from HttpServer import HttpServer
-from KakaoBotHandler import KakaoBotHandler
 from ContentsCuratorHandler import ContentsCuratorHandler
 
 
