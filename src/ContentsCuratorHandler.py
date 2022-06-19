@@ -6,7 +6,12 @@ from KakaoBotOutput import *
 
 class ContentsCuratorHandler(KakaoBotHandler):
 
-    def OnFallback(self, response):
+    def OnFallback(self, response, userId, userRequestInfo):
+
+        userChat = userRequestInfo['utterance']
+        if userChat == 'help':
+            self.UsageCard(response)
+            return
 
         testData = [
             'aaa.txt',
@@ -15,7 +20,12 @@ class ContentsCuratorHandler(KakaoBotHandler):
         ]
 
         self.BrowserCard(response, testData)
+        return
 
+    def UsageCard(self, response):
+        response.AddText('Usage')
+        response.AddQuickReply(KakaoBotMsgButton('help'))
+        response.AddQuickReply(KakaoBotMsgButton('browser'))
         return
 
     def BrowserCard(self, response, entryList):

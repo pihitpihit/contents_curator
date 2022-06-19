@@ -10,9 +10,13 @@ class KakaoBotButton:
         raise NotImplementedError('KakaoBotButton.GetData method must be called after impement by a derived class.')
 
 class KakaoBotMsgButton(KakaoBotButton):
-    def __init__(self, label:str, msg:str, extra:dict = None):
+    def __init__(self, label:str, msg:str = None, extra:dict = None):
         self.action = 'message'
+
         self.msg = msg
+        if not self.msg:
+            self.msg = label
+
         KakaoBotButton.__init__(self, label, extra)
         return
 

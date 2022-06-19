@@ -51,12 +51,37 @@ class KakaoBotHandler(HttpServer.HttpServerHandler):
         dictJson = self.GetRequestJson()
         print('[Response] intent : %s' % dictJson['intent'])
 
+        (userId, userRequestInfo) = self.SetUserRequestInfo(dictJson)
         response = KakaoBotResponse()
         if dictJson['intent']['name'] == '폴백 블록':
-            self.OnFallback(response)
+            self.OnFallback(response, userId, userRequestInfo)
             return response.GetData()
 
         return self.MakeSimpleResponse()
+
+    def SetUserRequestInfo(self, requestJson):
+
+        # declaration
+        try:
+            if self.users is None:
+                self.users = {}
+        except:
+            self.users = {}
+
+        jsonUserRequest = requestJson['userRequest']
+        userId = jsonUserRequest['user']['id']
+
+        # make user space
+        if userId not in self.users:
+            self.users[userId] = {}
+
+        self.users[userId]['type']       = jsonUserRequest['user']['type']
+        self.users[userId]['properties'] = jsonUserRequest['user']['properties']
+        self.users[userId]['utterance']  = jsonUserRequest['utterance']
+        self.users[userId]['params']     = jsonUserRequest['params']
+        self.users[userId]['lang']       = jsonUserRequest['timezone']
+        self.users[userId]['contexts']   = requestJson['contexts']
+        return (userId, self.users[userId])
 
     def MakeSimpleResponse(self):
         dictRes = {}
@@ -66,10 +91,10 @@ class KakaoBotHandler(HttpServer.HttpServerHandler):
         }
         return dictRes
 
-    def OnFallBack(self):
+    def OnFallback(self, userId, userRequestInfo):
         raise NotImplementedError('Fallback block method is not implmented.')
 
-    def OnFallBackTest(self):
+    def OnFallbackTest(self, userId, userRequestInfo):
 
         if False:
             carousel = KakaoBotCarousel()
