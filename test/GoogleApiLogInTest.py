@@ -1,4 +1,4 @@
-from ast import Is, Not
+from fileinput import filename
 import mimetypes
 import os
 import io
@@ -38,7 +38,7 @@ def ConnectGoogleDrive():
 
   try:
     service = build('drive', 'v3', credentials=creds)
-    print('conncet')
+    print('[SUCESS] conncet')
 
   except:
     print('[FAIL]conncet')
@@ -53,7 +53,8 @@ def RetrieveAllFilesFolders(service):
   
   while True:
     results = service.files().list(
-      pageSize=500, fields='nextPageToken, files(id, name)',
+      pageSize=500, 
+      fields='nextPageToken, files(id, name)',
       pageToken=pToken).execute()
     items = results.get('files', [])
 
@@ -78,21 +79,24 @@ def PrintContentsList(contents):
 
   return
 
+#Not Impliment Yet
 def IsExistFile(service, fileName):
   """
     fileName과 동일한 파일 네임이 존재하는지 검사.
   """
-  
+  #print(fileName)
   contentsList = list()
   pToken = None
   
   while True:
     results = service.files().list(
-      name=fileName,
-      pageSize=500, fields='nextPageToken, files(id, name)',
+      #q="name='StudyJordy.png'",
+      q = "fullText contains 'Jordy' and mimeType != 'application/vnd.google-apps.folder'",
+      pageSize=500, 
+      fields='nextPageToken, files(id, name)',
       pageToken=pToken).execute()
     items = results.get('files', [])
-
+    
     contentsList.extend(items)
     #for item in items:
     #  contentsList.append(item)
@@ -101,7 +105,8 @@ def IsExistFile(service, fileName):
     if not pToken:
       break
   
-
+  print( 'List Size : %d' % len(contentsList) )
+  print( contentsList )
   return contentsList
 
 def DownloadByFileId(service, fId):
@@ -136,17 +141,21 @@ def main():
   print('[main] Start')
   contentsList = None
   
+  #파일 및 폴더 검색
   service = ConnectGoogleDrive()
-  #contentsList = RetrieveAllFilesFolders(service)
+  contentsList = RetrieveAllFilesFolders(service)
+  PrintContentsList(contentsList)
   
-  #PrintContentsList(contentsList)
+  #다운로드 By FileID
   #StudyJordyFileID = '1wyNFNt1CaWfOQMBD0XkqS_8kfcltvqlR'
   #DownloadByFileId(service, StudyJordyFileID)
+
+  #타겟 파일 검색
   #contentsList = RetrieveAllFilesFolders(service)
-  targetList = IsExistFile(service, 'StudyJordy.png')
-  if not targetList:
-    for target in targetList:
-      print( target['name'] )
+  #targetList = IsExistFile(service, 'StudyJordy.png')
+  # if not targetList:
+  #   for target in targetList:
+  #     print( target['name'] )
 
   #PrintContentsList(contentsList)
 
