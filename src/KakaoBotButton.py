@@ -26,7 +26,7 @@ class KakaoBotMsgButton(KakaoBotButton):
 class KakaoBotLinkButton(KakaoBotButton):
     def __init__(self, label:str, url:str, extra:dict = None):
         self.action = 'webLink'
-        self.url = url 
+        self.url = url
         KakaoBotButton.__init__(self, label, extra)
         return
 
