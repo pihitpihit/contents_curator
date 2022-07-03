@@ -223,17 +223,26 @@ class GoogleDriver :
         fileList = self.MakeFInfoList(result)
         return fileList
 
-    def DownLoadByInfo(self, info, outName) :
-        self.DownloadByFileId(info.hash, outName)
+    def DownloadByInfo(self, info, outName, filePath=None) :
+        self.DownloadByFileId( outName=outName, fId=info.hash, outPath=filePath)
         return
 
-    def DownloadByFileId(self, fId, outName) :
-
+    def DownloadByFileId(self,  outName, fId, outPath = None) :
         print( '[Downlaod] Start')
         request = self.service.files().get_media(fileId=fId)
         #fh = io.BytesIO()
-        fh = io.FileIO(outName, mode='wb')
-        downLoader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
+
+        outFile = None
+        if outPath is not None :
+            bExist = os.path.isdir(outPath)
+            if bExist != True:
+                os.mkdir(outPath)
+            outFile = outPath + outName
+        else :
+            outFile = outName
+
+        fh = io.FileIO(outFile, mode='wb')
+        downLoader = MediaIoBaseDownload(fh, request )#, chunksize=1024*1024)
         done = False
 
         while done is False:
@@ -337,7 +346,8 @@ def main() :
     for info in infoList:
         
         info.print()
-        conn.DownLoadByInfo( info , info.name)
+        path = str('C:\\Users\\diffe\\Documents\\GitHub\\contents_curator\\img\\')
+        conn.DownloadByInfo( info=info , outName=info.name, filePath=path )
         
 #    result = conn.GetFolderList()
     
