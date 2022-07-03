@@ -223,7 +223,7 @@ class GoogleDriver :
         fileList = self.MakeFInfoList(result)
         return fileList
 
-    def DownloadByInfo(self, info, outName, filePath=None) :
+    def DownloadByInfo(self, outName, info, filePath=None) :
         self.DownloadByFileId( outName=outName, fId=info.hash, outPath=filePath)
         return
 
