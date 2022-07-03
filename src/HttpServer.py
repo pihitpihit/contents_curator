@@ -40,7 +40,7 @@ class HttpServerHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(jsonRes)
-            print('[do_POST][RESPONSE]', dictRes)
+            #print('[do_POST][RESPONSE]', dictRes)
 
         except:
             self.send_response(500)
@@ -61,14 +61,6 @@ class HttpServerHandler(BaseHTTPRequestHandler):
         return self.requestJson
 
     def MakeResponse(self):
-        dictRes = {}
-        dictRes['version'] = '1.0'
-        dictRes['data'] = {
-            'msg': self.Response()
-        }
-        return dictRes
-
-    def Response(self):
         return self.HelloWorldMessage()
 
     def HelloWorldMessage(self):
